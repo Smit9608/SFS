@@ -1,0 +1,897 @@
+html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Satya Financial Advisory – Your Trusted Financial Partner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:#1a3a6b; --blue2:#0f2548; --teal:#2a7d6f; --teal2:#3aaa96;
+      --accent:#f0a500; --light:#eef2f8; --white:#ffffff;
+      --text:#1c2b45; --muted:#6b7a99; --border:rgba(26,58,107,0.12);
+      --r:12px; --ease:cubic-bezier(.22,1,.36,1);
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: var(--white); color: var(--text); overflow-x: hidden; }
+
+    /* LOADER */
+    #loader {
+      position:fixed; inset:0; background:var(--blue2); z-index:99999;
+      display:flex; align-items:center; justify-content:center; flex-direction:column; gap:1.5rem;
+      transition:opacity 0.6s var(--ease), visibility 0.6s;
+    }
+    #loader.hide { opacity:0; visibility:hidden; }
+    .loader-logo { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--white); }
+    .loader-logo span { color:var(--teal2); }
+    .loader-track { width:180px; height:2px; background:rgba(255,255,255,0.15); border-radius:999px; overflow:hidden; }
+    .loader-fill { height:100%; width:0; background:var(--teal2); border-radius:999px; transition:width 1.8s var(--ease); }
+
+    /* CURSOR */
+    @media (pointer:fine) {
+      body { cursor:none; }
+      #cursor {
+        width:10px; height:10px; background:var(--teal2); border-radius:50%;
+        position:fixed; top:0; left:0; pointer-events:none; z-index:9999;
+        transform:translate(-50%,-50%); transition:width 0.25s, height 0.25s, background 0.25s;
+      }
+      #cursor-ring {
+        width:34px; height:34px; border:1.5px solid var(--teal2); border-radius:50%;
+        position:fixed; top:0; left:0; pointer-events:none; z-index:9998;
+        transform:translate(-50%,-50%); opacity:0.6;
+      }
+      body.cur-hover #cursor { width:18px; height:18px; background:var(--accent); }
+      body.cur-hover #cursor-ring { width:44px; height:44px; border-color:var(--accent); opacity:0.35; }
+    }
+
+    /* NAV */
+    nav {
+      position:fixed; top:0; left:0; right:0; z-index:1000;
+      padding:0 2.5rem; height:68px;
+      display:flex; align-items:center; justify-content:space-between;
+      transition:background 0.4s, box-shadow 0.4s;
+    }
+    nav.scrolled { background:rgba(15,37,72,0.96); backdrop-filter:blur(14px); box-shadow:0 1px 0 rgba(58,170,150,0.2); }
+    .nav-logo { font-family:'Playfair Display',serif; font-size:1.25rem; font-weight:700; color:var(--white); text-decoration:none; }
+    .nav-logo span { color:var(--teal2); }
+    .nav-links { display:flex; gap:1.8rem; list-style:none; align-items:center; }
+    .nav-links a {
+      color:rgba(255,255,255,0.75); text-decoration:none; font-size:0.84rem; letter-spacing:0.04em;
+      position:relative; transition:color 0.25s;
+    }
+    .nav-links a::after {
+      content:''; position:absolute; bottom:-3px; left:0;
+      width:0; height:1.5px; background:var(--teal2); transition:width 0.3s var(--ease);
+    }
+    .nav-links a:hover { color:var(--white); }
+    .nav-links a:hover::after { width:100%; }
+    .nav-cta { padding:0.5rem 1.25rem !important; background:var(--teal) !important; color:var(--white) !important; border-radius:6px; font-weight:600 !important; transition:background 0.25s, transform 0.2s !important; }
+    .nav-cta::after { display:none !important; }
+    .nav-cta:hover { background:var(--teal2) !important; transform:scale(1.03) !important; }
+    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:4px; z-index:1001; }
+    .hamburger span { width:22px; height:2px; background:white; border-radius:2px; transition:all 0.3s var(--ease); display:block; }
+    .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+    .mobile-menu { display:none; position:fixed; inset:0; background:var(--blue2); z-index:1000; flex-direction:column; align-items:center; justify-content:center; gap:2rem; }
+    .mobile-menu.open { display:flex; animation:fadeIn 0.3s var(--ease); }
+    .mobile-menu a { color:var(--white); text-decoration:none; font-size:1.4rem; font-family:'Playfair Display',serif; transition:color 0.2s; }
+    .mobile-menu a:hover { color:var(--teal2); }
+
+    /* HERO */
+    .hero {
+      min-height:100vh; background:linear-gradient(135deg,var(--blue2) 0%,var(--blue) 60%,#1d4e89 100%);
+      position:relative; display:flex; align-items:center; justify-content:center;
+      overflow:hidden; padding-bottom:100px;
+    }
+    .hero-grid {
+      position:absolute; inset:0;
+      background-image:linear-gradient(rgba(58,170,150,0.07) 1px,transparent 1px),linear-gradient(90deg,rgba(58,170,150,0.07) 1px,transparent 1px);
+      background-size:55px 55px; animation:gridMove 25s linear infinite;
+    }
+    @keyframes gridMove { from{background-position:0 0} to{background-position:55px 55px} }
+    .orb { position:absolute; border-radius:50%; filter:blur(70px); animation:orbFloat 14s ease-in-out infinite; }
+    .orb-1 { width:480px; height:480px; background:rgba(42,125,111,0.18); top:-120px; right:-80px; }
+    .orb-2 { width:320px; height:320px; background:rgba(58,170,150,0.1); bottom:60px; left:-60px; animation-delay:-6s; }
+    .orb-3 { width:200px; height:200px; background:rgba(240,165,0,0.08); top:35%; left:25%; animation-delay:-3s; }
+    @keyframes orbFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-28px)} }
+    .hero-content { position:relative; z-index:2; text-align:center; padding:2rem; max-width:820px; }
+    .hero-badge {
+      display:inline-flex; align-items:center; gap:8px;
+      background:rgba(58,170,150,0.15); border:1px solid rgba(58,170,150,0.35); color:var(--teal2);
+      padding:0.4rem 1rem; border-radius:999px; font-size:0.78rem; letter-spacing:0.12em; text-transform:uppercase;
+      margin-bottom:1.8rem; animation:fadeDown 0.8s var(--ease) both;
+    }
+    .hero-badge .dot { width:6px; height:6px; border-radius:50%; background:var(--teal2); animation:blink 2s ease-in-out infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+    .hero h1 {
+      font-family:'Playfair Display',serif; font-size:clamp(2.6rem,6.5vw,5.2rem); font-weight:700;
+      color:var(--white); line-height:1.1; margin-bottom:1.4rem; animation:fadeUp 0.9s 0.15s var(--ease) both;
+    }
+    .hero h1 em { font-style:italic; color:var(--teal2); }
+    .hero p { font-size:1.1rem; color:rgba(255,255,255,0.65); max-width:500px; margin:0 auto 2.4rem; line-height:1.75; animation:fadeUp 0.9s 0.3s var(--ease) both; }
+    .hero-buttons { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; animation:fadeUp 0.9s 0.45s var(--ease) both; }
+    .hero-stats {
+      position:absolute; bottom:0; left:0; right:0;
+      background:rgba(255,255,255,0.06); border-top:1px solid rgba(58,170,150,0.2);
+      display:flex; justify-content:center; animation:fadeUp 0.9s 0.7s var(--ease) both;
+    }
+    .stat-item { padding:1.25rem 2.5rem; text-align:center; border-right:1px solid rgba(58,170,150,0.15); flex:1; max-width:200px; }
+    .stat-item:last-child { border-right:none; }
+    .stat-num { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--teal2); display:block; line-height:1; margin-bottom:4px; }
+    .stat-label { font-size:0.72rem; color:rgba(255,255,255,0.5); letter-spacing:0.08em; text-transform:uppercase; }
+    .scroll-hint {
+      position:absolute; bottom:115px; left:50%; transform:translateX(-50%);
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      color:rgba(255,255,255,0.25); font-size:0.68rem; letter-spacing:0.15em; text-transform:uppercase;
+      animation:fadeIn 2s 1.2s both; z-index:2;
+    }
+    .scroll-line { width:1px; height:42px; background:linear-gradient(to bottom,transparent,var(--teal2)); animation:scrollDrop 2.2s ease-in-out infinite; }
+    @keyframes scrollDrop { 0%{transform:scaleY(0);transform-origin:top;opacity:0} 50%{transform:scaleY(1);transform-origin:top;opacity:1} 100%{transform:scaleY(0);transform-origin:bottom;opacity:0} }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp   { from{opacity:0;transform:translateY(36px)} to{opacity:1;transform:none} }
+    @keyframes fadeDown { from{opacity:0;transform:translateY(-18px)} to{opacity:1;transform:none} }
+    @keyframes fadeIn   { from{opacity:0} to{opacity:1} }
+    @keyframes scaleIn  { from{opacity:0;transform:scale(0.88)} to{opacity:1;transform:none} }
+    .reveal { opacity:0; transform:translateY(40px); transition:opacity 0.7s var(--ease),transform 0.7s var(--ease); }
+    .reveal.from-left  { transform:translateX(-50px); }
+    .reveal.from-right { transform:translateX(50px); }
+    .reveal.visible { opacity:1 !important; transform:none !important; }
+    .d1{transition-delay:80ms} .d2{transition-delay:160ms} .d3{transition-delay:240ms} .d4{transition-delay:320ms}
+
+    /* SHARED */
+    section { padding:5.5rem 2rem; }
+    .si { max-width:1080px; margin:0 auto; }
+    .eyebrow { display:inline-block; font-size:0.72rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--teal); border-left:2.5px solid var(--teal); padding-left:0.75rem; margin-bottom:0.7rem; }
+    .eyebrow.lt { color:var(--teal2); border-color:var(--teal2); }
+    h2.st { font-family:'Playfair Display',serif; font-size:clamp(1.9rem,3.8vw,3rem); font-weight:700; color:var(--text); line-height:1.15; margin-bottom:0.9rem; }
+    h2.st.lt { color:var(--white); }
+    .sdesc { color:var(--muted); font-size:0.97rem; line-height:1.72; max-width:510px; margin-bottom:3rem; }
+    .btn-primary {
+      padding:0.85rem 2rem; background:var(--teal); color:var(--white);
+      border:none; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.92rem; font-weight:600;
+      cursor:pointer; position:relative; overflow:hidden; transition:transform 0.25s var(--ease),box-shadow 0.25s,background 0.25s;
+    }
+    .btn-primary::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.18),transparent); transform:translateX(-110%); transition:transform 0.4s var(--ease); }
+    .btn-primary:hover { background:var(--teal2); transform:translateY(-3px); box-shadow:0 12px 32px rgba(42,125,111,0.38); }
+    .btn-primary:hover::after { transform:translateX(110%); }
+    .btn-primary:active { transform:translateY(0); }
+    .btn-outline { padding:0.85rem 2rem; background:transparent; color:var(--white); border:1.5px solid rgba(255,255,255,0.3); border-radius:8px; font-family:'Inter',sans-serif; font-size:0.92rem; cursor:pointer; transition:border-color 0.25s,background 0.25s,transform 0.25s var(--ease); }
+    .btn-outline:hover { border-color:var(--teal2); background:rgba(58,170,150,0.1); transform:translateY(-3px); }
+
+    /* SERVICES */
+    #services { background:var(--light); }
+    .svc-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:1.4rem; }
+    .svc-card { background:var(--white); border-radius:var(--r); padding:2rem; border:1px solid var(--border); position:relative; overflow:hidden; transition:transform 0.4s var(--ease),box-shadow 0.4s,border-color 0.4s; }
+    .svc-card::before { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--teal),var(--teal2)); transform:scaleX(0); transform-origin:left; transition:transform 0.4s var(--ease); }
+    .svc-card:hover { transform:translateY(-8px); box-shadow:0 20px 50px rgba(26,58,107,0.1); border-color:rgba(42,125,111,0.25); }
+    .svc-card:hover::before { transform:scaleX(1); }
+    .svc-icon { width:48px; height:48px; background:rgba(42,125,111,0.1); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:1.4rem; margin-bottom:1.2rem; transition:transform 0.4s var(--ease),background 0.3s; }
+    .svc-card:hover .svc-icon { transform:rotate(6deg) scale(1.12); background:rgba(42,125,111,0.18); }
+    .svc-card h3 { font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:600; color:var(--text); margin-bottom:0.5rem; }
+    .svc-card p { font-size:0.86rem; color:var(--muted); line-height:1.65; }
+
+    /* HEALTH CHECK */
+    #health-check { background:var(--blue2); }
+    .quiz-wrap { background:rgba(255,255,255,0.05); border:1px solid rgba(58,170,150,0.2); border-radius:var(--r); padding:2.5rem; max-width:660px; margin:0 auto; }
+    .quiz-q { margin-bottom:1.8rem; }
+    .quiz-q p { color:rgba(255,255,255,0.88); font-size:0.93rem; font-weight:500; margin-bottom:0.9rem; }
+    .quiz-opts { display:flex; flex-direction:column; gap:0.5rem; }
+    .quiz-opt { display:flex; align-items:center; gap:0.75rem; padding:0.65rem 1rem; border:1px solid rgba(58,170,150,0.18); border-radius:8px; cursor:pointer; transition:background 0.22s,border-color 0.22s; }
+    .quiz-opt:hover { background:rgba(58,170,150,0.1); border-color:rgba(58,170,150,0.45); }
+    .quiz-opt input { accent-color:var(--teal2); cursor:pointer; }
+    .quiz-opt label { color:rgba(255,255,255,0.68); font-size:0.87rem; cursor:pointer; width:100%; }
+    .quiz-wrap.light-bg .quiz-q p { color:var(--text); }
+    .quiz-wrap.light-bg .quiz-opt label { color:var(--muted); }
+    .quiz-wrap.light-bg .quiz-opt { border-color:var(--border); }
+    .quiz-wrap.light-bg .quiz-opt:hover { background:var(--light); border-color:rgba(42,125,111,0.3); }
+    #hc-btn,#profile-btn { width:100%; margin-top:1.8rem; padding:0.95rem; background:var(--teal); color:var(--white); border:none; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.97rem; font-weight:600; cursor:pointer; transition:background 0.25s,transform 0.2s var(--ease); }
+    #hc-btn:hover,#profile-btn:hover { background:var(--teal2); transform:scale(1.02); }
+    .score-box { margin-top:1.8rem; padding:2rem; background:rgba(58,170,150,0.08); border:1px solid rgba(58,170,150,0.25); border-radius:var(--r); text-align:center; display:none; }
+    .score-box.show { display:block; animation:scaleIn 0.45s var(--ease) both; }
+    .score-box.error-box { background:rgba(240, 165, 0, 0.1); border-color:rgba(240, 165, 0, 0.4); }
+    .score-big { font-family:'Playfair Display',serif; font-size:4.5rem; font-weight:700; color:var(--teal2); line-height:1; }
+    .score-msg { color:rgba(255,255,255,0.6); margin-top:0.6rem; font-size:0.92rem; }
+
+    /* PLANNERS */
+    #calculators { background:var(--white); }
+    .tab-row { display:flex; background:var(--light); border-radius:10px; padding:4px; width:fit-content; margin-bottom:2.2rem; }
+    .tab-btn { padding:0.55rem 1.4rem; border:none; background:none; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.87rem; color:var(--muted); cursor:pointer; transition:background 0.25s,color 0.25s; }
+    .tab-btn.active { background:var(--blue); color:var(--white); }
+    .tab-btn:hover:not(.active) { background:rgba(26,58,107,0.08); color:var(--text); }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; animation:fadeUp 0.35s var(--ease) both; }
+    .calc-card { background:var(--light); border-radius:var(--r); padding:2rem; max-width:460px; display:flex; flex-direction:column; gap:1.1rem; }
+    .calc-card label { font-size:0.8rem; color:var(--muted); display:block; margin-bottom:0.3rem; }
+    .calc-card input { width:100%; padding:0.68rem 0.9rem; border:1.5px solid var(--border); border-radius:8px; font-family:'Inter',sans-serif; font-size:0.92rem; color:var(--text); background:var(--white); transition:border-color 0.25s,box-shadow 0.25s; }
+    .calc-card input:focus { outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(42,125,111,0.1); }
+    .calc-submit { padding:0.8rem; background:var(--blue); color:var(--white); border:none; border-radius:8px; font-family:'Inter',sans-serif; font-size:0.92rem; font-weight:600; cursor:pointer; transition:background 0.25s,transform 0.2s var(--ease); }
+    .calc-submit:hover { background:var(--blue2); transform:scale(1.02); }
+    .calc-result { padding:1rem 1.2rem; background:rgba(42,125,111,0.08); border:1px solid rgba(42,125,111,0.25); border-radius:8px; font-family:'Playfair Display',serif; font-size:1.35rem; color:var(--blue); display:none; }
+    .calc-result.error { font-size: 1rem; color: #d32f2f; background: rgba(211, 47, 47, 0.08); border-color: rgba(211, 47, 47, 0.25); font-family: 'Inter', sans-serif;}
+    .calc-result.show { display:block; animation:fadeUp 0.35s var(--ease) both; }
+
+    /* BLOG */
+    #knowledge-center { background:var(--light); }
+    .blog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:1.6rem; }
+    .blog-card { background:var(--white); border-radius:var(--r); overflow:hidden; border:1px solid var(--border); transition:transform 0.4s var(--ease),box-shadow 0.4s; }
+    .blog-card:hover { transform:translateY(-7px); box-shadow:0 18px 44px rgba(26,58,107,0.1); }
+    .blog-img-wrap { aspect-ratio:16/9; overflow:hidden; position:relative; }
+    .blog-img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform 0.55s var(--ease); }
+    .blog-card:hover .blog-img-wrap img { transform:scale(1.07); }
+    .blog-tag { position:absolute; top:0.9rem; left:0.9rem; background:var(--teal); color:var(--white); font-size:0.68rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; padding:0.28rem 0.65rem; border-radius:999px; }
+    .blog-body { padding:1.4rem; }
+    .blog-body h3 { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:600; color:var(--text); margin-bottom:0.5rem; line-height:1.3; }
+    .blog-body p { font-size:0.84rem; color:var(--muted); line-height:1.62; margin-bottom:1rem; }
+    .read-more { display:inline-flex; align-items:center; gap:5px; color:var(--teal); font-size:0.84rem; font-weight:500; text-decoration:none; transition:gap 0.3s var(--ease),color 0.25s; }
+    .read-more:hover { gap:9px; color:var(--teal2); }
+
+    /* TESTIMONIALS */
+    #testimonials { background:var(--blue2); }
+    .testi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:1.4rem; }
+    .testi-card { background:rgba(255,255,255,0.05); border:1px solid rgba(58,170,150,0.15); border-radius:var(--r); padding:1.8rem; transition:transform 0.4s var(--ease),box-shadow 0.4s,border-color 0.4s; }
+    .testi-card:hover { transform:translateY(-7px); box-shadow:0 18px 44px rgba(0,0,0,0.25); border-color:rgba(58,170,150,0.35); }
+    .stars { color:var(--accent); font-size:0.95rem; letter-spacing:2px; margin-bottom:0.9rem; }
+    .testi-text { font-size:0.9rem; color:rgba(255,255,255,0.68); line-height:1.75; font-style:italic; margin-bottom:1.4rem; }
+    .testi-author { display:flex; align-items:center; gap:0.75rem; }
+    .author-av { width:40px; height:40px; border-radius:50%; flex-shrink:0; background:linear-gradient(135deg,var(--teal),var(--blue)); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display',serif; font-size:1rem; color:var(--white); font-weight:700; }
+    .author-name { color:var(--white); font-size:0.88rem; font-weight:500; }
+    .author-role { color:rgba(255,255,255,0.45); font-size:0.76rem; }
+
+    /* INVESTOR PROFILE */
+    #investor-profile { background:var(--light); }
+    .profile-result { margin-top:1.8rem; padding:1.5rem 2rem; background:var(--white); border:1px solid rgba(42,125,111,0.25); border-left:4px solid var(--teal); border-radius:var(--r); display:none; }
+    .profile-result.error { border-left-color: var(--accent); }
+    .profile-result.show { display:block; animation:fadeUp 0.45s var(--ease) both; }
+    .profile-result h3 { font-family:'Playfair Display',serif; font-size:1.3rem; color:var(--blue); margin-bottom:0.4rem; }
+    .profile-result.error h3 { color: var(--accent); }
+    .profile-result p { font-size:0.9rem; color:var(--muted); line-height:1.65; }
+
+    /* ABOUT */
+    #about { background:var(--white); }
+    .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:center; }
+    .about-img-wrap { border-radius:var(--r); overflow:hidden; position:relative; }
+    .about-img-wrap img { width:100%; aspect-ratio:4/3; object-fit:cover; display:block; transition:transform 0.55s var(--ease); }
+    .about-img-wrap:hover img { transform:scale(1.04); }
+    .about-img-wrap::after { content:''; position:absolute; inset:0; border:2px solid var(--teal); border-radius:var(--r); transform:translate(10px,10px); z-index:-1; pointer-events:none; }
+    .values { display:flex; flex-direction:column; gap:0.7rem; margin-top:1.8rem; }
+    .val-row { display:flex; align-items:center; gap:0.75rem; padding:0.7rem 1rem; border-radius:8px; transition:background 0.25s; }
+    .val-row:hover { background:var(--light); }
+    .vdot { width:7px; height:7px; border-radius:50%; background:var(--teal); flex-shrink:0; transition:transform 0.3s var(--ease); }
+    .val-row:hover .vdot { transform:scale(1.8); }
+    .val-row span { font-size:0.9rem; color:var(--text); }
+
+    /* AI */
+    #ai-section { background:var(--blue); padding:5.5rem 2rem; }
+    .ai-inner { max-width:640px; margin:0 auto; }
+    .ai-form { background:rgba(255,255,255,0.07); border:1px solid rgba(58,170,150,0.22); border-radius:var(--r); padding:2.2rem; margin-top:2rem; }
+    .ai-field { margin-bottom:1.1rem; }
+    .ai-field label { display:block; font-size:0.8rem; color:rgba(255,255,255,0.55); margin-bottom:0.35rem; }
+    .ai-field input { width:100%; padding:0.72rem 0.95rem; background:rgba(255,255,255,0.07); border:1.5px solid rgba(58,170,150,0.2); border-radius:8px; font-family:'Inter',sans-serif; font-size:0.9rem; color:var(--white); transition:border-color 0.25s,box-shadow 0.25s; }
+    .ai-field input::placeholder { color:rgba(255,255,255,0.3); }
+    .ai-field input:focus { outline:none; border-color:var(--teal2); box-shadow:0 0 0 3px rgba(58,170,150,0.12); }
+    .ai-result { margin-top:1.4rem; padding:1.4rem; background:rgba(58,170,150,0.08); border:1px solid rgba(58,170,150,0.22); border-radius:10px; color:rgba(255,255,255,0.82); font-size:0.9rem; line-height:1.75; display:none; white-space:pre-wrap; }
+    .ai-result.error { background:rgba(240, 165, 0, 0.1); border-color:rgba(240, 165, 0, 0.4); color: #f0a500;}
+    .ai-result.show { display:block; animation:fadeUp 0.45s var(--ease) both; }
+
+    /* CONTACT */
+    #contact { background:var(--light); }
+    .contact-grid { display:grid; grid-template-columns:1fr 1fr; gap:3.5rem; align-items:start; }
+    .contact-form { display:flex; flex-direction:column; gap:1rem; }
+    .contact-form label { font-size:0.8rem; color:var(--muted); display:block; margin-bottom:0.3rem; }
+    .contact-form input,.contact-form textarea { width:100%; padding:0.72rem 0.95rem; border:1.5px solid var(--border); border-radius:8px; font-family:'Inter',sans-serif; font-size:0.9rem; color:var(--text); background:var(--white); transition:border-color 0.25s,box-shadow 0.25s; }
+    .contact-form input:focus,.contact-form textarea:focus { outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(42,125,111,0.1); }
+    .contact-form textarea { resize:vertical; min-height:120px; }
+    .contact-info { display:flex; flex-direction:column; gap:1.2rem; }
+    .info-card { display:flex; align-items:center; gap:1rem; padding:1.1rem; background:var(--white); border-radius:10px; border:1px solid var(--border); transition:transform 0.3s var(--ease),box-shadow 0.3s; }
+    .info-card:hover { transform:translateX(5px); box-shadow:0 6px 24px rgba(26,58,107,0.08); }
+    .info-icon { width:38px; height:38px; background:rgba(42,125,111,0.1); border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .info-label { font-size:0.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; }
+    .info-val { font-size:0.88rem; color:var(--text); font-weight:500; }
+    .contact-msg-box { padding:1rem 1.2rem; background:rgba(42,125,111,0.08); border:1px solid rgba(42,125,111,0.3); border-radius:8px; color:var(--teal); font-size:0.9rem; font-weight:500; display:none; }
+    .contact-msg-box.error { background:rgba(211, 47, 47, 0.08); border-color:rgba(211, 47, 47, 0.25); color: #d32f2f; }
+    .contact-msg-box.show { display:block; animation:fadeUp 0.35s var(--ease) both; }
+
+    /* FOOTER */
+    footer { background:var(--blue2); padding:1.8rem 2rem; text-align:center; color:rgba(255,255,255,0.4); font-size:0.82rem; border-top:1px solid rgba(58,170,150,0.12); }
+    footer strong { color:var(--teal2); }
+
+    /* MOBILE */
+    @media(max-width:768px){
+      nav { padding:0 1.2rem; }
+      .nav-links { display:none; }
+      .hamburger { display:flex; }
+      .hero-stats { flex-wrap:wrap; }
+      .stat-item { border-right:none; border-bottom:1px solid rgba(58,170,150,0.12); max-width:50%; }
+      .about-grid,.contact-grid { grid-template-columns:1fr; gap:2rem; }
+      .about-img-wrap::after { display:none; }
+      section { padding:4rem 1.2rem; }
+      #ai-section { padding:4rem 1.2rem; }
+      .scroll-hint { display:none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">Satya <span>Financial</span></div>
+  <div class="loader-track"><div class="loader-fill" id="loaderFill"></div></div>
+</div>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<nav id="navbar">
+  <a href="#home" class="nav-logo">Satya <span>Financial</span></a>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#health-check">Health Check</a></li>
+    <li><a href="#calculators">Planners</a></li>
+    <li><a href="#knowledge-center">Blog</a></li>
+    <li><a href="#testimonials">Testimonials</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#contact" class="nav-cta">Get Started</a></li>
+  </ul>
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#services" onclick="closeMenu()">Services</a>
+  <a href="#health-check" onclick="closeMenu()">Health Check</a>
+  <a href="#calculators" onclick="closeMenu()">Planners</a>
+  <a href="#knowledge-center" onclick="closeMenu()">Blog</a>
+  <a href="#testimonials" onclick="closeMenu()">Testimonials</a>
+  <a href="#about" onclick="closeMenu()">About</a>
+  <a href="#contact" onclick="closeMenu()">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-grid"></div>
+  <div class="orb orb-1"></div><div class="orb orb-2"></div><div class="orb orb-3"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><div class="dot"></div>Your Trusted Financial Partner</div>
+    <h1>Unlock Your <em>Financial Potential</em></h1>
+    <p>Expert strategies for wealth growth, investment management, and a secure financial future.</p>
+    <div class="hero-buttons">
+      <button class="btn-primary" onclick="goto('#contact')">Get Started</button>
+      <button class="btn-outline" onclick="goto('#services')">Our Services</button>
+    </div>
+  </div>
+  <div class="scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+  <div class="hero-stats">
+    <div class="stat-item"><span class="stat-num" data-target="500" data-suffix="+">0</span><span class="stat-label">Happy Clients</span></div>
+    <div class="stat-item"><span class="stat-num" data-target="15" data-suffix="+">0</span><span class="stat-label">Years Experience</span></div>
+    <div class="stat-item"><span class="stat-num" data-target="98" data-suffix="%">0</span><span class="stat-label">Satisfaction Rate</span></div>
+    <div class="stat-item"><span class="stat-num" data-target="200" data-suffix="+">0</span><span class="stat-label">Crore AUM Managed</span></div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="si">
+    <div style="text-align:center;margin-bottom:3.5rem">
+      <p class="eyebrow reveal">What We Offer</p>
+      <h2 class="st reveal d1">Our Services</h2>
+      <p class="sdesc reveal d2" style="margin:0 auto">We provide a comprehensive range of financial services to meet your unique needs.</p>
+    </div>
+    <div class="svc-grid">
+      <div class="svc-card reveal d1"><div class="svc-icon">💼</div><h3>Fund Management</h3><p>Expert services to grow your investments and achieve your long-term financial objectives.</p></div>
+      <div class="svc-card reveal d2"><div class="svc-icon">📊</div><h3>Portfolio Analysis</h3><p>In-depth analysis to optimize your asset allocation and manage risk effectively.</p></div>
+      <div class="svc-card reveal d3"><div class="svc-icon">🏦</div><h3>Loan Restructuring</h3><p>Improve financial stability with more manageable repayment plans.</p></div>
+      <div class="svc-card reveal d4"><div class="svc-icon">🚀</div><h3>Project Financing</h3><p>Secure capital for your projects with our comprehensive financing solutions.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- HEALTH CHECK -->
+<section id="health-check">
+  <div class="si">
+    <p class="eyebrow lt reveal">Interactive Tool</p>
+    <h2 class="st lt reveal d1">Financial Health Check</h2>
+    <p class="sdesc reveal d2" style="color:rgba(255,255,255,0.5)">Get a quick snapshot of your financial health with our interactive tool.</p>
+    <div class="quiz-wrap reveal">
+      <div class="quiz-q"><p>1. What percentage of your monthly income do you save?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt"><input type="radio" name="q1" id="q1a" value="1"><label for="q1a">Less than 10%</label></div>
+          <div class="quiz-opt"><input type="radio" name="q1" id="q1b" value="2"><label for="q1b">10% – 20%</label></div>
+          <div class="quiz-opt"><input type="radio" name="q1" id="q1c" value="3"><label for="q1c">21% – 30%</label></div>
+          <div class="quiz-opt"><input type="radio" name="q1" id="q1d" value="4"><label for="q1d">More than 30%</label></div>
+        </div>
+      </div>
+      <div class="quiz-q"><p>2. Do you have an emergency fund covering at least 3 months of living expenses?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt"><input type="radio" name="q2" id="q2a" value="1"><label for="q2a">No</label></div>
+          <div class="quiz-opt"><input type="radio" name="q2" id="q2b" value="4"><label for="q2b">Yes</label></div>
+        </div>
+      </div>
+      <div class="quiz-q"><p>3. What is your total debt (excluding home loan) to annual income ratio?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt"><input type="radio" name="q3" id="q3a" value="1"><label for="q3a">More than 50%</label></div>
+          <div class="quiz-opt"><input type="radio" name="q3" id="q3b" value="2"><label for="q3b">20% – 50%</label></div>
+          <div class="quiz-opt"><input type="radio" name="q3" id="q3c" value="4"><label for="q3c">Less than 20%</label></div>
+        </div>
+      </div>
+      <div class="quiz-q"><p>4. Are you regularly investing for your long-term goals (e.g., retirement)?</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt"><input type="radio" name="q4" id="q4a" value="1"><label for="q4a">No</label></div>
+          <div class="quiz-opt"><input type="radio" name="q4" id="q4b" value="4"><label for="q4b">Yes</label></div>
+        </div>
+      </div>
+      <button id="hc-btn">Calculate My Score</button>
+      <div class="score-box" id="scoreBox"><div class="score-big" id="scoreBig">0%</div><div class="score-msg" id="scoreMsg"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANNERS -->
+<section id="calculators">
+  <div class="si">
+    <p class="eyebrow reveal">Goal-Based</p>
+    <h2 class="st reveal d1">Goal-Based Planners</h2>
+    <p class="sdesc reveal d2">Calculate the investment needed to achieve your financial dreams.</p>
+    <div class="tab-row reveal">
+      <button class="tab-btn active" data-tab="retirement">Retirement</button>
+      <button class="tab-btn" data-tab="education">Education</button>
+      <button class="tab-btn" data-tab="homeloan">Home Loan</button>
+    </div>
+    <div class="tab-panel active" id="tab-retirement">
+      <div class="calc-card">
+        <div><label>Current Age</label><input type="number" id="currAge" placeholder="e.g. 30" min="18" max="65"/></div>
+        <div><label>Retirement Age</label><input type="number" id="retAge" placeholder="e.g. 60" min="30" max="80"/></div>
+        <div><label>Monthly Expenses at Retirement (₹)</label><input type="number" id="monthExp" placeholder="e.g. 50000"/></div>
+        <div><label>Expected Return Rate (% p.a.)</label><input type="number" id="retRate" placeholder="e.g. 12" step="0.1"/></div>
+        <button class="calc-submit" id="calcRetire">Calculate</button>
+        <div class="calc-result" id="retireRes"></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-education">
+      <div class="calc-card">
+        <div><label>Future Cost of Education (₹)</label><input type="number" id="eduCost" placeholder="e.g. 2000000"/></div>
+        <div><label>Years Until Needed</label><input type="number" id="eduYears" placeholder="e.g. 10"/></div>
+        <div><label>Expected Return Rate (% p.a.)</label><input type="number" id="eduRate" placeholder="e.g. 12" step="0.1"/></div>
+        <button class="calc-submit" id="calcEdu">Calculate</button>
+        <div class="calc-result" id="eduRes"></div>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-homeloan">
+      <div class="calc-card">
+        <div><label>Loan Amount (₹)</label><input type="number" id="loanAmt" placeholder="e.g. 5000000"/></div>
+        <div><label>Interest Rate (% p.a.)</label><input type="number" id="loanRate" placeholder="e.g. 8.5" step="0.1"/></div>
+        <div><label>Loan Tenure (Years)</label><input type="number" id="loanTenure" placeholder="e.g. 20"/></div>
+        <button class="calc-submit" id="calcEMI">Calculate EMI</button>
+        <div class="calc-result" id="emiRes"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOG -->
+<section id="knowledge-center">
+  <div class="si">
+    <p class="eyebrow reveal">Stay Informed</p>
+    <h2 class="st reveal d1">Knowledge Center</h2>
+    <p class="sdesc reveal d2">Stay informed with our latest articles and financial insights.</p>
+    <div class="blog-grid">
+      <div class="blog-card reveal d1">
+        <div class="blog-img-wrap"><img src="https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=600&auto=format&fit=crop" alt="Mutual Funds"/><span class="blog-tag">Investing</span></div>
+        <div class="blog-body"><h3>Understanding Different Types of Mutual Funds</h3><p>Dive deep into the world of mutual funds. Learn the difference between equity, debt, and hybrid funds to make informed investment choices.</p><a href="#" class="read-more">Read More →</a></div>
+      </div>
+      <div class="blog-card reveal d2">
+        <div class="blog-img-wrap"><img src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=600&auto=format&fit=crop" alt="Tax Saving"/><span class="blog-tag">Tax Planning</span></div>
+        <div class="blog-body"><h3>Latest Updates on Tax-Saving Investments</h3><p>Explore popular tax-saving options like ELSS, PPF, and NPS. Understand the latest rules and how they can help you reduce your tax burden.</p><a href="#" class="read-more">Read More →</a></div>
+      </div>
+      <div class="blog-card reveal d3">
+        <div class="blog-img-wrap"><img src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=600&auto=format&fit=crop" alt="Emergency Fund"/><span class="blog-tag">Financial Health</span></div>
+        <div class="blog-body"><h3>Building an Emergency Fund: Your First Step</h3><p>An emergency fund is your financial safety net. Learn why it's crucial, how much you should save, and where to keep it.</p><a href="#" class="read-more">Read More →</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="si">
+    <p class="eyebrow lt reveal">Client Stories</p>
+    <h2 class="st lt reveal d1">What Our Clients Say</h2>
+    <p class="sdesc reveal d2" style="color:rgba(255,255,255,0.45)">We are proud to have helped our clients achieve their financial goals.</p>
+    <div class="testi-grid">
+      <div class="testi-card reveal d1">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"Working with Satya Financial Advisory was a game-changer for my retirement planning. Their advice was clear, personalized, and highly effective. I feel much more confident about my future."</p>
+        <div class="testi-author"><div class="author-av">P</div><div><div class="author-name">Priya S.</div><div class="author-role">Software Engineer</div></div></div>
+      </div>
+      <div class="testi-card reveal d2">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"Their team helped us restructure our loans and create a manageable budget. The financial stress is gone, and we are now building wealth for our family's future. Highly recommended!"</p>
+        <div class="testi-author"><div class="author-av">R</div><div><div class="author-name">Rajesh &amp; Anjali K.</div><div class="author-role">Business Owners</div></div></div>
+      </div>
+      <div class="testi-card reveal d3">
+        <div class="stars">★★★★★</div>
+        <p class="testi-text">"As a freelancer, my income can be unpredictable. Satya Financial helped me set up a solid investment plan through SIPs. I'm amazed at how my portfolio has grown."</p>
+        <div class="testi-author"><div class="author-av">A</div><div><div class="author-name">Amit V.</div><div class="author-role">Graphic Designer</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INVESTOR PROFILE -->
+<section id="investor-profile">
+  <div class="si">
+    <p class="eyebrow reveal">Know Yourself</p>
+    <h2 class="st reveal d1">What's Your Investor Profile?</h2>
+    <p class="sdesc reveal d2">Answer a few questions to understand your risk tolerance.</p>
+    <div class="quiz-wrap light-bg reveal">
+      <div class="quiz-q">
+        <p style="color:var(--text)">1. My primary goal for this investment is:</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt"><input type="radio" name="ip1" id="ip1a" value="conservative"><label for="ip1a">Capital Preservation: I want to protect my principal amount.</label></div>
+          <div class="quiz-opt"><input type="radio" name="ip1" id="ip1b" value="moderate"><label for="ip1b">Income: I need regular income from my investments.</label></div>
+          <div class="quiz-opt"><input type="radio" name="ip1" id="ip1c" value="aggressive"><label for="ip1c">Growth: I want my capital to grow significantly over the long term.</label></div>
+        </div>
+      </div>
+      <div class="quiz-q">
+        <p style="color:var(--text)">2. If my portfolio value dropped 20% in a year, I would:</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt"><input type="radio" name="ip2" id="ip2a" value="conservative"><label for="ip2a">Sell all my investments to avoid further loss.</label></div>
+          <div class="quiz-opt"><input type="radio" name="ip2" id="ip2b" value="moderate"><label for="ip2b">Sell some, but hold on to others.</label></div>
+          <div class="quiz-opt"><input type="radio" name="ip2" id="ip2c" value="moderate"><label for="ip2c">Hold on and wait for the market to recover.</label></div>
+          <div class="quiz-opt"><input type="radio" name="ip2" id="ip2d" value="aggressive"><label for="ip2d">Invest more, it's a great buying opportunity.</label></div>
+        </div>
+      </div>
+      <div class="quiz-q">
+        <p style="color:var(--text)">3. I am most comfortable with investments that have:</p>
+        <div class="quiz-opts">
+          <div class="quiz-opt"><input type="radio" name="ip3" id="ip3a" value="conservative"><label for="ip3a">Low risk and low potential returns.</label></div>
+          <div class="quiz-opt"><input type="radio" name="ip3" id="ip3b" value="moderate"><label for="ip3b">Moderate risk and moderate potential returns.</label></div>
+          <div class="quiz-opt"><input type="radio" name="ip3" id="ip3c" value="aggressive"><label for="ip3c">High risk and high potential returns.</label></div>
+        </div>
+      </div>
+      <button id="profile-btn">Find My Profile</button>
+      <div class="profile-result" id="profileResult"><h3 id="profileTitle"></h3><p id="profileDesc"></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="si">
+    <div class="about-grid">
+      <div class="about-img-wrap reveal from-left">
+        <img src="https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=1000" alt="Our Team"/>
+      </div>
+      <div class="reveal from-right">
+        <p class="eyebrow">Who We Are</p>
+        <h2 class="st">About Satya Financial Advisory</h2>
+        <p class="sdesc">At Satya Financial Advisory, our mission is to empower individuals and businesses to achieve financial prosperity through expert guidance, personalized strategies, and unwavering integrity. We are committed to building long-lasting relationships based on trust and transparency.</p>
+        <p style="font-size:0.9rem;color:var(--muted);line-height:1.72;margin-bottom:1.5rem">Our team of seasoned financial experts brings decades of combined experience in diverse areas of finance. We believe in a client-first approach, ensuring that your goals are at the forefront of every decision we make. Our core values are excellence, dedication, and ethical practice.</p>
+        <div class="values">
+          <div class="val-row"><div class="vdot"></div><span>Client-first approach — your goals, our priority</span></div>
+          <div class="val-row"><div class="vdot"></div><span>Decades of combined financial expertise</span></div>
+          <div class="val-row"><div class="vdot"></div><span>Built on trust, transparency &amp; ethical practice</span></div>
+          <div class="val-row"><div class="vdot"></div><span>Proudly serving clients from Junagadh, Gujarat</span></div>
+        </div>
+        <button class="btn-primary" style="margin-top:2rem" onclick="goto('#contact')">Learn More</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI SNAPSHOT -->
+<section id="ai-section">
+  <div class="ai-inner">
+    <p class="eyebrow lt reveal" style="color:var(--teal2);border-color:var(--teal2)">AI-Powered</p>
+    <h2 class="st lt reveal d1">✨ Get Your AI-Powered Financial Snapshot</h2>
+    <p class="sdesc reveal d2" style="color:rgba(255,255,255,0.5);margin-bottom:0">Fill out the form below to get a high-level financial summary and personalized recommendations generated by our AI assistant.</p>
+    <div class="ai-form reveal">
+      <div class="ai-field"><label>Your Age</label><input type="number" id="aiAge" placeholder="e.g. 30" min="18" max="80"/></div>
+      <div class="ai-field"><label>Annual Income (₹)</label><input type="number" id="aiIncome" placeholder="e.g. 800000"/></div>
+      <div class="ai-field"><label>Current Savings (₹)</label><input type="number" id="aiSavings" placeholder="e.g. 200000"/></div>
+      <div class="ai-field"><label>Financial Goals</label><input type="text" id="aiGoals" placeholder="e.g. Retirement, child education, home purchase"/></div>
+      <button class="btn-primary" id="aiBtn" onclick="generateSnapshot()" style="width:100%">Send Request to Advisor</button>
+      <div class="ai-result" id="aiResult"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="si">
+    <div class="contact-grid">
+      <div>
+        <p class="eyebrow reveal">Get In Touch</p>
+        <h2 class="st reveal d1">Get in Touch</h2>
+        <p class="sdesc reveal d2">Have questions? We'd love to hear from you. Reach out to us for a free consultation.</p>
+        <div class="contact-info reveal d3">
+          <div class="info-card"><div class="info-icon">📞</div><div><div class="info-label">Phone</div><div class="info-val">+91 6356509081</div></div></div>
+          <div class="info-card"><div class="info-icon">📧</div><div><div class="info-label">Email</div><div class="info-val">goswamismit9@gmail.com</div></div></div>
+          <div class="info-card"><div class="info-icon">📍</div><div><div class="info-label">Location</div><div class="info-val">Junagadh, Gujarat, India</div></div></div>
+        </div>
+      </div>
+      <div class="reveal d2">
+        <div class="contact-form">
+          <div><label>Your Email</label><input type="email" id="contactEmail" placeholder="you@example.com"/></div>
+          <div><label>Your Message</label><textarea id="contactMsg" rows="5" placeholder="Tell us about your financial goals..."></textarea></div>
+          <button class="btn-primary" id="sendBtn" onclick="sendMsg()" style="width:100%">Send via WhatsApp</button>
+          <div class="contact-msg-box" id="contactMsgBox"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 <strong>Satya Financial Advisory</strong>. All Rights Reserved. | Junagadh, Gujarat, India</p>
+</footer>
+
+<script>
+/* LOADER */
+window.addEventListener('load', () => {
+  const fill = document.getElementById('loaderFill');
+  fill.style.width = '100%';
+  setTimeout(() => document.getElementById('loader').classList.add('hide'), 2000);
+});
+
+/* CURSOR */
+if (window.matchMedia('(pointer:fine)').matches) {
+  const cur = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  (function anim(){
+    if(cur){ cur.style.left=mx+'px'; cur.style.top=my+'px'; }
+    rx+=(mx-rx)*0.12; ry+=(my-ry)*0.12;
+    if(ring){ ring.style.left=rx+'px'; ring.style.top=ry+'px'; }
+    requestAnimationFrame(anim);
+  })();
+  document.querySelectorAll('a,button').forEach(el => {
+    el.addEventListener('mouseenter', () => document.body.classList.add('cur-hover'));
+    el.addEventListener('mouseleave', () => document.body.classList.remove('cur-hover'));
+  });
+}
+
+/* NAV */
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 55);
+});
+
+/* MOBILE MENU */
+const ham = document.getElementById('hamburger');
+const mob = document.getElementById('mobileMenu');
+ham.addEventListener('click', () => {
+  ham.classList.toggle('open');
+  mob.classList.toggle('open');
+  document.body.style.overflow = mob.classList.contains('open') ? 'hidden' : '';
+});
+function closeMenu() {
+  ham.classList.remove('open'); mob.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* SCROLL HELPER */
+function goto(sel) { document.querySelector(sel)?.scrollIntoView({behavior:'smooth'}); }
+
+/* SCROLL REVEAL */
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('visible'); ro.unobserve(e.target); } });
+}, {threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+/* COUNT-UP */
+const co = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(!e.isIntersecting) return;
+    const el = e.target;
+    const target = +el.dataset.target;
+    const suffix = el.dataset.suffix || '';
+    let curr = 0;
+    const step = target / 80;
+    const t = setInterval(() => {
+      curr = Math.min(curr + step, target);
+      el.textContent = Math.floor(curr) + suffix;
+      if(curr >= target){ el.textContent = target + suffix; clearInterval(t); }
+    }, 16);
+    co.unobserve(el);
+  });
+}, {threshold:0.5});
+document.querySelectorAll('[data-target]').forEach(el => co.observe(el));
+
+/* TABS */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab)?.classList.add('active');
+  });
+});
+
+/* HEALTH CHECK */
+document.getElementById('hc-btn').addEventListener('click', () => {
+  let total=0, answered=0;
+  const box = document.getElementById('scoreBox');
+  const title = document.getElementById('scoreBig');
+  const msgText = document.getElementById('scoreMsg');
+
+  ['q1','q2','q3','q4'].forEach(q => {
+    const s = document.querySelector(`input[name="${q}"]:checked`);
+    if(s){ total += +s.value; answered++; }
+  });
+
+  if(answered < 4){ 
+    box.classList.remove('show');
+    // small delay to re-trigger animation
+    setTimeout(() => {
+        box.classList.add('error-box');
+        title.textContent = 'Oops!';
+        msgText.textContent = 'Please answer all 4 questions to calculate your score.';
+        box.classList.add('show');
+    }, 50);
+    return; 
+  }
+
+  box.classList.remove('error-box');
+  const pct = Math.round((total/16)*100);
+  const msg = pct>=80 ? '🟢 Excellent! You are on a strong financial path.'
+             : pct>=55 ? '🟡 Good — a few areas to improve.'
+             :            '🔴 Needs attention — let us help you get on track!';
+  
+  box.classList.remove('show');
+  setTimeout(() => {
+    title.textContent = pct+'%';
+    msgText.textContent = msg;
+    box.classList.add('show');
+  }, 50);
+});
+
+/* CALCULATORS */
+function showError(resElem, msg) {
+    resElem.textContent = msg;
+    resElem.classList.add('error');
+    resElem.classList.remove('show');
+    setTimeout(() => resElem.classList.add('show'), 50);
+}
+
+function showResult(resElem, msg) {
+    resElem.textContent = msg;
+    resElem.classList.remove('error');
+    resElem.classList.remove('show');
+    setTimeout(() => resElem.classList.add('show'), 50);
+}
+
+document.getElementById('calcRetire').addEventListener('click', () => {
+  const curr=+document.getElementById('currAge').value;
+  const ret=+document.getElementById('retAge').value;
+  const exp=+document.getElementById('monthExp').value;
+  const rate=+document.getElementById('retRate').value;
+  const res=document.getElementById('retireRes');
+
+  if(!curr||!ret||!exp||!rate||ret<=curr){ 
+      showError(res, 'Please fill all fields correctly. Retirement age must be greater than current age.'); 
+      return; 
+  }
+  const n=(ret-curr)*12, r=rate/100/12;
+  const sip=((exp*12*25)*r)/(Math.pow(1+r,n)-1);
+  showResult(res, 'Monthly SIP Required: ₹' + Math.round(sip).toLocaleString('en-IN'));
+});
+
+document.getElementById('calcEdu').addEventListener('click', () => {
+  const cost=+document.getElementById('eduCost').value;
+  const years=+document.getElementById('eduYears').value;
+  const rate=+document.getElementById('eduRate').value;
+  const res=document.getElementById('eduRes');
+  if(!cost||!years||!rate){ 
+      showError(res, 'Please fill all fields correctly.'); 
+      return; 
+  }
+  const n=years*12, r=rate/100/12;
+  const sip=(cost*r)/(Math.pow(1+r,n)-1);
+  showResult(res, 'Monthly SIP Required: ₹' + Math.round(sip).toLocaleString('en-IN'));
+});
+
+document.getElementById('calcEMI').addEventListener('click', () => {
+  const p=+document.getElementById('loanAmt').value;
+  const r=(+document.getElementById('loanRate').value/100)/12;
+  const n=+document.getElementById('loanTenure').value*12;
+  const res=document.getElementById('emiRes');
+  if(!p||!r||!n){ 
+      showError(res, 'Please fill all fields correctly.'); 
+      return; 
+  }
+  const emi=(p*r*Math.pow(1+r,n))/(Math.pow(1+r,n)-1);
+  showResult(res, 'Monthly EMI: ₹' + Math.round(emi).toLocaleString('en-IN'));
+});
+
+/* INVESTOR PROFILE */
+document.getElementById('profile-btn').addEventListener('click', () => {
+  const resBox = document.getElementById('profileResult');
+  const resTitle = document.getElementById('profileTitle');
+  const resDesc = document.getElementById('profileDesc');
+
+  const answers = ['ip1','ip2','ip3'].map(q => {
+    const s = document.querySelector(`input[name="${q}"]:checked`);
+    return s ? s.value : null;
+  });
+
+  if(answers.includes(null)){ 
+    resBox.classList.remove('show');
+    setTimeout(() => {
+        resBox.classList.add('error');
+        resTitle.textContent = 'Incomplete Assessment';
+        resDesc.textContent = 'Please answer all 3 questions to find out your investor profile.';
+        resBox.classList.add('show');
+    }, 50);
+    return; 
+  }
+
+  resBox.classList.remove('error');
+  const counts={conservative:0,moderate:0,aggressive:0};
+  answers.forEach(a => counts[a]++);
+  const profile = Object.keys(counts).reduce((a,b) => counts[a]>=counts[b]?a:b);
+  const profiles = {
+    conservative:{ title:'🛡️ Conservative Investor', desc:'You prioritize safety and stability. We recommend Fixed Deposits, Debt Mutual Funds, PPF, and Government Bonds for steady, reliable returns with minimal risk.' },
+    moderate:{ title:'⚖️ Moderate Investor', desc:'You seek balance between growth and stability. A diversified portfolio with Hybrid Mutual Funds and Balanced Advantage Funds would suit you well.' },
+    aggressive:{ title:'🚀 Aggressive Investor', desc:'You are comfortable with volatility in pursuit of higher returns. Equity Mutual Funds, Direct Stocks, and Small-cap Funds are ideal for your long investment horizon.' }
+  };
+  
+  resBox.classList.remove('show');
+  setTimeout(() => {
+    resTitle.textContent = profiles[profile].title;
+    resDesc.textContent  = profiles[profile].desc;
+    resBox.classList.add('show');
+  }, 50);
+});
+
+/* AI SNAPSHOT & LEAD CAPTURE - Redesigned to actually work without exposing API keys */
+function generateSnapshot(){
+  const age=document.getElementById('aiAge').value.trim();
+  const income=document.getElementById('aiIncome').value.trim();
+  const savings=document.getElementById('aiSavings').value.trim();
+  const goals=document.getElementById('aiGoals').value.trim();
+  const resBox = document.getElementById('aiResult');
+
+  if(!age||!income||!savings||!goals){ 
+      resBox.textContent = 'Please fill in all fields so we can generate your snapshot.';
+      resBox.classList.add('error');
+      resBox.classList.remove('show');
+      setTimeout(() => resBox.classList.add('show'), 50);
+      return; 
+  }
+  
+  resBox.classList.remove('error', 'show');
+  // Forward lead directly to WhatsApp instead of broken frontend API call
+  const text = `Hello Satya Financial Advisory! I would like to request an AI-Powered Financial Snapshot. Here are my details:\n\nAge: ${age}\nAnnual Income: ₹${income}\nCurrent Savings: ₹${savings}\nFinancial Goals: ${goals}`;
+  window.open(`https://wa.me/916356509081?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+/* CONTACT - Fixed to send to WhatsApp */
+function sendMsg(){
+  const email=document.getElementById('contactEmail').value.trim();
+  const msg=document.getElementById('contactMsg').value.trim();
+  const msgBox = document.getElementById('contactMsgBox');
+
+  const showContactError = (errorMsg) => {
+      msgBox.textContent = errorMsg;
+      msgBox.classList.add('error');
+      msgBox.classList.remove('show');
+      setTimeout(() => msgBox.classList.add('show'), 50);
+  };
+
+  if(!email||!msg){ 
+      showContactError('Please fill in both your email and message.'); 
+      return; 
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ 
+      showContactError('Please enter a valid email address.'); 
+      return; 
+  }
+  
+  msgBox.classList.remove('error', 'show');
+  const text = `New Website Inquiry\n\nFrom: ${email}\nMessage: ${msg}`;
+  window.open(`https://wa.me/916356509081?text=${encodeURIComponent(text)}`, '_blank');
+}
+</script>
+</body>
+</html>
